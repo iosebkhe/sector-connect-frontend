@@ -1,5 +1,6 @@
 import axios from "axios";
-const baseUrl = "https://sectorconnectdb.onrender.com/api/users";
+const baseUrl = import.meta.env.VITE_USER_API_URI;
+
 
 const getAll = async () => {
   const response = await axios.get(baseUrl);
