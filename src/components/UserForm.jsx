@@ -42,7 +42,7 @@ const UserForm = () => {
             setAgreedToTerms(parsedUser.agreedToTerms);
           } else {
             // Handle the case where the user doesn't exist in the database anymore
-            console.log('User does not exist in the database.');
+            toast.error('User does not exist in the database.');
             localStorage.removeItem("sectorConnectUser");
           }
         }
