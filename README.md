@@ -3,4 +3,4 @@
 
 ### created with react + vite
 
-[Live Website](https://phonebook-app-fullstack.fly.dev/)
+[Live Website](https://sector-connect-frontend.vercel.app/)
