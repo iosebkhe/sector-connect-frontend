@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useState, useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import sectorService from '../services/sectors.js';
