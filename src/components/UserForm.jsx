@@ -12,20 +12,45 @@ const UserForm = () => {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [sectors, setSectors] = useState([]);
   const [user, setUser] = useState(null);
+  const [allUsers, setAllUsers] = useState([]);
 
   useEffect(() => {
-    sectorService.getAll().then((allSectors) => {
-      setSectors(allSectors);
+    const fetchData = async () => {
+      try {
+        const [allSectors, allUsersFromDB] = await Promise.all([
+          sectorService.getAll(),
+          usersService.getAll()
+        ]);
 
-      const storedUser = localStorage.getItem('sectorConnectUser');
-      if (storedUser) {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-        setName(parsedUser.username);
-        setSelectedSectors(parsedUser.sectors.map((sector) => sector.id));
-        setAgreedToTerms(parsedUser.agreedToTerms);
+        setSectors(allSectors);
+        setAllUsers(allUsersFromDB);
+
+        const storedUser = localStorage.getItem('sectorConnectUser');
+        if (storedUser) {
+          const parsedUser = JSON.parse(storedUser);
+
+          // Check if the user exists in the allUsers array fetched from the database
+          const userExistsInDatabase = allUsersFromDB.some(
+            (user) => user.id === parsedUser.id || user.username === parsedUser.username
+          );
+
+          if (userExistsInDatabase) {
+            setUser(parsedUser);
+            setName(parsedUser.username);
+            setSelectedSectors(parsedUser.sectors.map((sector) => sector.id));
+            setAgreedToTerms(parsedUser.agreedToTerms);
+          } else {
+            // Handle the case where the user doesn't exist in the database anymore
+            console.log('User does not exist in the database.');
+            localStorage.removeItem("sectorConnectUser");
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
       }
-    });
+    };
+
+    fetchData();
   }, []);
 
   const handleNameChange = (event) => {
@@ -52,17 +77,17 @@ const UserForm = () => {
     event.preventDefault();
 
     if (!name) {
-      alert('Please enter a name.');
+      toast.error(`Please enter a name.`);
       return;
     }
 
     if (selectedSectors.length === 0) {
-      alert('Please select at least one sector.');
+      toast.error(`Please select at least 1 sector.`);
       return;
     }
 
     if (!agreedToTerms) {
-      alert('Please agree to the terms.');
+      toast.error(`Please agree to the terms.`);
       return;
     }
 
@@ -73,14 +98,9 @@ const UserForm = () => {
         agreedToTerms: agreedToTerms
       };
 
-
-      if (!agreedToTerms) {
-        alert('Please agree to the terms.');
-        return;
-      }
-
       // Send data to backend
       let returnedUser;
+
       if (user && user.username === name) {
         returnedUser = await usersService.update(user.id, updatedUser);
       } else {
@@ -88,7 +108,7 @@ const UserForm = () => {
       }
       localStorage.setItem('sectorConnectUser', JSON.stringify(returnedUser));
       setUser(returnedUser);
-      toast(`user ${returnedUser.username} successfully saved`);
+      toast.success(`user ${returnedUser.username} successfully saved`);
     } catch (error) {
       console.log(error);
     }

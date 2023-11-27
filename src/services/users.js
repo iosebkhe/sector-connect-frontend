@@ -17,4 +17,11 @@ const update = async (id, newUpdatedObject) => {
   return response.data;
 };
 
-export default { getAll, create, update };
+// Function to check if the user exists in the database
+const doesUserExistInDB = (parsedUser, allUsers) => {
+  return allUsers.some(
+    (user) => user.id === parsedUser.id || user.username === parsedUser.username
+  );
+};
+
+export default { getAll, create, update, doesUserExistInDB };
